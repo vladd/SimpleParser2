@@ -9,7 +9,7 @@
 
 using namespace std;
 
-string text = "repeat (1)\n"
+string text = "repeat (3)\n"
               "{\n"
               "click(10,10)\n"
               "pause(100s)\n"
