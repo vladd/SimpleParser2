@@ -33,4 +33,28 @@ inline void f_click(const activation_record&, const vector<shared_ptr<value>>& a
     cout << "click: (" << x << ", " << y << ")" << endl;
 }
 
+inline void f_dump(const activation_record&, const vector<shared_ptr<value>>& args)
+{
+    cout << "dump: ";
+    bool first = true;
+    for (auto& arg : args)
+    {
+        auto parg = arg.get();
+        if (!parg)
+            throw runtime_exception("impossible: no arg value");
+        if (!first)
+            cout << ", ";
+        auto pintarg = dynamic_cast<typed_value<int>*>(parg);
+        if (pintarg)
+            cout << pintarg->value << " (int)" << endl;
+        auto ptimearg = dynamic_cast<typed_value<chrono::seconds>*>(parg);
+        if (ptimearg)
+            cout << ptimearg->value.count() << "s (time)" << endl;
+        auto pboolarg = dynamic_cast<typed_value<bool>*>(parg);
+        if (pboolarg)
+            cout << boolalpha << pboolarg->value << " (bool)" << endl;
+        first = false;
+    }
+}
+
 #endif

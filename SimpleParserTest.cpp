@@ -9,24 +9,39 @@
 
 using namespace std;
 
-string text = "repeat (3)\n"
-              "{\n"
-              "click(10,10)\n"
-              "pause(100s)\n"
-              "click(10,10)\n"
-              "def f(x) { click(1, 1) if (x) { f(false) } }\n"
-              "repeat(2)\n"
-              "   {\n"
-              "   pause(10s)\n"
-              "   f(true)\n"
-              "   }\n"
-              "}";
+string text = 
+    R"%(
+        def g(x, y)
+        {
+            def f(x) { dump(y) }
+            def h(y) { f(y) }
+            h(true)
+        }
+        g(1, 2)
+        repeat (3)
+        {
+            def f(x)
+            {
+                click(1, 1)
+                dump(x)
+                if (x) { f(false) }
+            }
+            click(10,10)
+            pause(100s)
+            click(10,10)
+            repeat(2)
+            {
+               pause(10s)
+               f(true)
+            }
+        })%";
 
 int main(int argc, char* argv[])
 {
     activation_record r;
     r.install_function(f_pause, 1, "pause");
     r.install_function(f_click, 2, "click");
+    r.install_function(f_dump, 1, "dump");
 
     auto& ns = r.get_ns();
 
