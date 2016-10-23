@@ -115,11 +115,17 @@ struct def_statement : public statement
     string name;
     vector<string> argnames;
     shared_ptr<statement> p_statement;
-    virtual void execute(activation_record& r)
+    virtual void execute(activation_record& lexical_record)
     {
-        auto func = [=](const activation_record& r, const vector<shared_ptr<value>>& args)
+        // we can catch lexical_record by reference, since it the current design a function never leaves its
+        // lexical scope, so the lexical activation record is guaranteed to be alive during the function's lifetime.
+        // if it will be possible to escape the definition scope (e.g. by returning a function from a function),
+        // we would need to make this perhaps a strong reference
+        auto func = [=, &lexical_record](const activation_record& execution_record, const vector<shared_ptr<value>>& args)
         {
-            activation_record inner(&r);
+            // the referenced outer variables belong to a lexical scope, not a dynamic scope
+            // (arbitrary language design desision, but most of languages do it this way)
+            activation_record inner(&lexical_record);
             int argnum = args.size();
             if (argnum != argnames.size())
                 throw runtime_exception("impossible: number of arguments mismatch for function call");
@@ -127,7 +133,7 @@ struct def_statement : public statement
                 inner.install_var(args[i], argnames[i]);
             p_statement->execute(inner);
         };
-        r.install_function(func, argnames.size(), name);
+        lexical_record.install_function(func, argnames.size(), name);
     }
 };
 
