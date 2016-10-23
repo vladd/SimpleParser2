@@ -311,6 +311,8 @@ namelist* parser::try_parse_namelist_until_rparen(namescope* pns)
             return result.release();
         if (t.type != tt_comma)
             throw parse_exception("comma expected between argument names", t);
+
         tokenizer.move_ahead();
+        t = tokenizer.peek_next();
     }
 }
